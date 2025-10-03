@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${{ github.ref_name }}$" | head -n 1)
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "No previous tag found, using initial commit"
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          
+          echo "Generating changelog from $PREVIOUS_TAG to ${{ github.ref_name }}"
+          
+          # Generate changelog
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..${{ github.sha }} --no-merges)
+          
+          # Create release notes
+          cat > release_notes.md << EOF
+          # Release ${{ github.ref_name }}
+          
+          ## What's Changed
+          
+          $CHANGELOG
+          
+          ## Docker Images
+          
+          The following Docker images have been updated:
+          
+          EOF
+          
+          # Find all actions and add to release notes
+          find actions -name "Dockerfile" -exec dirname {} \; | sort | while read action_dir; do
+            ACTION_NAME=$(basename "$action_dir")
+            echo "- \`dudizimber/alert-reactions-$ACTION_NAME:${{ github.ref_name }}\`" >> release_notes.md
+          done
+          
+          cat >> release_notes.md << EOF
+          
+          ## Usage
+          
+          Update your AlertReaction specifications to use the new image tags:
+          
+          \`\`\`yaml
+          - name: my-action
+            image: dudizimber/alert-reactions-action-name:${{ github.ref_name }}
+            # ... rest of configuration
+          \`\`\`
+          
+          **Full Changelog**: https://github.com/dudizimber/alert-reactions/compare/$PREVIOUS_TAG...${{ github.ref_name }}
+          EOF
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+
+  update-docs:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update action READMEs with new version
+        run: |
+          # Update all action READMEs to reference the new version
+          find actions -name "README.md" | while read readme; do
+            # Replace version references in usage examples
+            sed -i.bak "s|dudizimber/alert-reactions-[^:]*:v[0-9]*\.[0-9]*\.[0-9]*|dudizimber/alert-reactions-$(basename $(dirname $readme)):${{ github.ref_name }}|g" "$readme"
+            rm -f "$readme.bak"
+          done
+
+      - name: Commit version updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add actions/*/README.md
+          if git diff --staged --quiet; then
+            echo "No version updates needed"
+          else
+            git commit -m "Update action READMEs with version ${{ github.ref_name }}"
+            git push
+          fi

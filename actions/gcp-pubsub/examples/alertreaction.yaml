@@ -1,0 +1,113 @@
+apiVersion: alertreaction.io/v1alpha1
+kind: AlertReaction
+metadata:
+  name: gcp-pubsub-alert-reaction
+  namespace: monitoring
+spec:
+  alertName: HighCPUUsage
+  actions:
+  - name: publish-to-pubsub
+    image: dudizimber/alert-reactions-gcp-pubsub:v1.0.0
+    env:
+    # GCP Configuration
+    - name: GCP_PROJECT_ID
+      value: "your-gcp-project-id"
+    - name: PUBSUB_TOPIC_ID
+      value: "alert-notifications"
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: "/etc/gcp/service-account.json"
+    
+    # Optional Configuration
+    - name: MESSAGE_SOURCE
+      value: "k8s-production-cluster"
+    - name: TIMEOUT_SECONDS
+      value: "30"
+    
+    # Alert Data (automatically injected by operator)
+    - name: ALERT_JSON
+      valueFrom:
+        alertRef:
+          fieldPath: "."
+    - name: ALERT_NAME
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.alertname"
+    - name: ALERT_STATUS
+      valueFrom:
+        alertRef:
+          fieldPath: "status"
+    - name: ALERT_SEVERITY
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.severity"
+    - name: INSTANCE
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.instance"
+    - name: ALERT_SUMMARY
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.summary"
+    - name: ALERT_DESCRIPTION
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.description"
+    
+    # Mount service account credentials
+    volumeMounts:
+    - name: gcp-service-account
+      mountPath: /etc/gcp
+      readOnly: true
+    
+    # Resource limits
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"
+  
+  # Volume for service account
+  volumes:
+  - name: gcp-service-account
+    secret:
+      secretName: gcp-pubsub-credentials
+
+---
+# Alternative example using Workload Identity (GKE only)
+apiVersion: alertreaction.io/v1alpha1
+kind: AlertReaction
+metadata:
+  name: gcp-pubsub-workload-identity
+  namespace: monitoring
+  annotations:
+    # Bind to GCP service account via Workload Identity
+    iam.gke.io/gcp-service-account: alert-publisher@your-project-id.iam.gserviceaccount.com
+spec:
+  alertName: HighMemoryUsage
+  actions:
+  - name: publish-to-pubsub-wi
+    image: dudizimber/alert-reactions-gcp-pubsub:v1.0.0
+    env:
+    # GCP Configuration (no credentials file needed with Workload Identity)
+    - name: GCP_PROJECT_ID
+      value: "your-gcp-project-id"
+    - name: PUBSUB_TOPIC_ID
+      value: "memory-alerts"
+    - name: MESSAGE_SOURCE
+      value: "k8s-production-cluster"
+    
+    # Alert Data
+    - name: ALERT_JSON
+      valueFrom:
+        alertRef:
+          fieldPath: "."
+    
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"

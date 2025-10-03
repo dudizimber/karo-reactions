@@ -1,0 +1,28 @@
+# Binaries
+gcp-pubsub
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test files
+*.test
+coverage.out
+
+# Go specific
+vendor/
+*.mod
+*.sum
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# GCP credentials (should never be in image)
+*.json
+service-account*.json
+credentials.json
