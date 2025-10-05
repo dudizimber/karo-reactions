@@ -1,0 +1,80 @@
+apiVersion: alertreaction.io/v1alpha1
+kind: AlertReaction
+metadata:
+  name: static-workflow-example
+  namespace: monitoring
+spec:
+  alertName: DatabaseDown
+  actions:
+  - name: execute-db-recovery-workflow
+    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    env:
+    - name: GCP_PROJECT_ID
+      value: "my-gcp-project"
+    - name: GCP_LOCATION
+      value: "us-central1"
+    - name: WORKFLOW_NAME
+      value: "database-recovery-workflow"
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: "/etc/gcp/service-account.json"
+    - name: TIMEOUT_SECONDS
+      value: "600"
+    - name: WAIT_FOR_COMPLETION
+      value: "true"
+    - name: WORKFLOW_SOURCE
+      value: "production-k8s-cluster"
+    # Alert data passed to workflow
+    - name: ALERT_JSON
+      valueFrom:
+        alertRef:
+          fieldPath: "."
+    - name: ALERT_NAME
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.alertname"
+    - name: ALERT_STATUS
+      valueFrom:
+        alertRef:
+          fieldPath: "status"
+    - name: ALERT_SEVERITY
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.severity"
+    - name: INSTANCE
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.instance"
+    - name: ALERT_SUMMARY
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.summary"
+    - name: ALERT_DESCRIPTION
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.description"
+    volumeMounts:
+    - name: gcp-service-account
+      mountPath: /etc/gcp
+      readOnly: true
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"
+  volumes:
+  - name: gcp-service-account
+    secret:
+      secretName: gcp-workflows-credentials
+---
+# Secret for GCP service account (create this separately with your actual key)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gcp-workflows-credentials
+  namespace: monitoring
+type: Opaque
+data:
+  # Base64 encoded service account JSON key
+  service-account.json: LS0tLS1CRUdJTi...  # Replace with actual base64 encoded service account key
