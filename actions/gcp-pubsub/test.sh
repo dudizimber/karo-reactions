@@ -14,7 +14,7 @@ echo "Testing gcp-pubsub action with image: $IMAGE_NAME"
 echo "=== Running Unit Tests ==="
 if [ -d "src" ] && [ -f "src/go.mod" ]; then
     echo "Running Go unit tests..."
-    docker run --rm -v "$PWD/src:/app" -w /app golang:1.21-alpine go test ./...
+    docker run --rm -v "$PWD/src:/app" -w /app golang:1.24-alpine go test ./...
     echo "✅ Unit tests passed"
 else
     echo "⚠️  No Go modules found, skipping unit tests"

@@ -98,7 +98,7 @@ set -e
 IMAGE_NAME=${1:-"test-action:latest"}
 
 # Unit tests
-docker run --rm -v "$PWD/src:/app" -w /app golang:1.21-alpine go test ./...
+docker run --rm -v "$PWD/src:/app" -w /app golang:1.24-alpine go test ./...
 
 # Integration tests  
 docker run --rm -e TEST_VAR="value" "$IMAGE_NAME"

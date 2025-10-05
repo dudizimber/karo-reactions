@@ -144,7 +144,7 @@ echo "Testing action with image: $IMAGE_NAME"
 # Test 1: Unit tests (language-specific)
 echo "=== Running Unit Tests ==="
 if [ -d "src" ] && [ -f "src/go.mod" ]; then
-    docker run --rm -v "$PWD/src:/app" -w /app golang:1.21-alpine go test ./...
+    docker run --rm -v "$PWD/src:/app" -w /app golang:1.24-alpine go test ./...
     echo "✅ Unit tests passed"
 fi
 
