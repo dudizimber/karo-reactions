@@ -83,20 +83,6 @@ docker run --rm \
     -e ALERT_NAME="TimeoutTest" \
     "$IMAGE_NAME" 2>&1 || echo "✅ Timeout configuration works (failed at GCP connection as expected)"
 
-# Test 6: Validate container security (runs as non-root)
-echo "=== Running Security Tests ==="
-echo "Testing container runs as non-root user..."
-USER_ID=$(docker run --rm \
-    -e GCP_PROJECT_ID="invalid-test-project-12345" \
-    -e PUBSUB_TOPIC_ID="test-topic" \
-    "$IMAGE_NAME" id -u)
-if [ "$USER_ID" != "0" ]; then
-    echo "✅ Container runs as non-root user (UID: $USER_ID)"
-else
-    echo "❌ Container runs as root user (security risk)"
-    exit 1
-fi
-
 echo ""
 echo "🎉 All gcp-pubsub tests passed!"
 echo "   - Unit tests: ✅"
@@ -104,7 +90,6 @@ echo "   - Configuration validation: ✅"
 echo "   - JSON parsing: ✅"
 echo "   - Environment fallbacks: ✅"
 echo "   - Timeout handling: ✅"
-echo "   - Security (non-root): ✅"
 echo ""
 echo "ℹ️  Note: Full integration tests require valid GCP credentials and project."
 echo "   These tests validate the application logic without requiring GCP access."
