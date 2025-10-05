@@ -209,6 +209,17 @@ git push origin release/webhook-sender/v1.2.0
 
 We welcome contributions of new actions! Please see our contribution guidelines for details on how to submit new actions.
 
+### 🤖 GitHub Copilot Templates
+Use our structured prompts to quickly create new actions with GitHub Copilot:
+
+- **[`.copilot/`](.copilot/)** - Complete prompt templates for:
+  - **Docker Actions**: Go, Python, Node.js implementations
+  - **Shell Actions**: Simple container-based actions
+  - **Test Scripts**: Comprehensive testing approaches
+  - **Documentation**: README and changelog templates
+
+**Quick start**: Copy a prompt from `.copilot/` → Paste into Copilot Chat → Follow the interactive guidance!
+
 ### For Shell-based Actions
 See `CONTRIBUTING.md` for templates and guidelines.
 
