@@ -203,6 +203,6 @@ jobs:
           else
             git add "actions/$ACTION_NAME/README.md"
             git commit -m "docs: update $ACTION_NAME README to version v$VERSION"
-            git push
+            git push origin HEAD:main
             echo "Committed version updates for $ACTION_NAME"
           fi
