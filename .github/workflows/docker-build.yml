@@ -171,11 +171,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Extract first image tag
+        id: first_image
+        run: |
+          echo "first_tag=$(echo '${{ steps.meta.outputs.tags }}' | cut -d',' -f1)" >> $GITHUB_OUTPUT
+
       - name: Run security scan
         if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.REGISTRY_USERNAME }}/alert-reactions-${{ steps.action.outputs.name }}:latest
+          image-ref: ${{ steps.first_image.outputs.first_tag }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 

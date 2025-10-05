@@ -86,7 +86,10 @@ docker run --rm \
 # Test 6: Validate container security (runs as non-root)
 echo "=== Running Security Tests ==="
 echo "Testing container runs as non-root user..."
-USER_ID=$(docker run --rm "$IMAGE_NAME" id -u)
+USER_ID=$(docker run --rm \
+    -e GCP_PROJECT_ID="invalid-test-project-12345" \
+    -e PUBSUB_TOPIC_ID="test-topic" \
+    "$IMAGE_NAME" id -u)
 if [ "$USER_ID" != "0" ]; then
     echo "✅ Container runs as non-root user (UID: $USER_ID)"
 else
