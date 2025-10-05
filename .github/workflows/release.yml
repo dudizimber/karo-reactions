@@ -1,111 +1,205 @@
-name: Release
+name: Release Action
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'release/*/*'  # Match release/<action-name>/<version>
 
 jobs:
-  create-release:
+  parse-release:
     runs-on: ubuntu-latest
     outputs:
-      release_id: ${{ steps.create_release.outputs.id }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      action_name: ${{ steps.parse.outputs.action_name }}
+      version: ${{ steps.parse.outputs.version }}
+      is_prerelease: ${{ steps.parse.outputs.is_prerelease }}
+    steps:
+      - name: Parse release tag
+        id: parse
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          echo "Parsing tag: $TAG_NAME"
+          
+          if [[ $TAG_NAME =~ ^release/([^/]+)/(.+)$ ]]; then
+            ACTION_NAME="${BASH_REMATCH[1]}"
+            VERSION="${BASH_REMATCH[2]}"
+            
+            # Check if this is a prerelease (contains alpha, beta, rc, or has suffix)
+            if [[ $VERSION =~ (alpha|beta|rc|-) ]]; then
+              IS_PRERELEASE="true"
+            else
+              IS_PRERELEASE="false"
+            fi
+            
+            echo "action_name=$ACTION_NAME" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+            
+            echo "Releasing action: $ACTION_NAME, version: $VERSION, prerelease: $IS_PRERELEASE"
+          else
+            echo "Invalid tag format. Expected: release/<action-name>/<version>"
+            exit 1
+          fi
+
+  create-release:
+    needs: parse-release
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Generate changelog
+      - name: Validate action exists
+        run: |
+          ACTION_NAME="${{ needs.parse-release.outputs.action_name }}"
+          if [ ! -d "actions/$ACTION_NAME" ]; then
+            echo "Error: Action directory 'actions/$ACTION_NAME' does not exist"
+            exit 1
+          fi
+          if [ ! -f "actions/$ACTION_NAME/Dockerfile" ]; then
+            echo "Error: No Dockerfile found in 'actions/$ACTION_NAME'"
+            exit 1
+          fi
+          echo "Action $ACTION_NAME validated successfully"
+
+      - name: Generate release notes
         id: changelog
         run: |
-          # Get the previous tag
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${{ github.ref_name }}$" | head -n 1)
+          ACTION_NAME="${{ needs.parse-release.outputs.action_name }}"
+          VERSION="${{ needs.parse-release.outputs.version }}"
+          CHANGELOG_PATH="actions/$ACTION_NAME/CHANGELOG.md"
           
-          if [ -z "$PREVIOUS_TAG" ]; then
-            echo "No previous tag found, using initial commit"
-            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+          # Check if action-specific CHANGELOG.md exists
+          if [ -f "$CHANGELOG_PATH" ]; then
+            echo "Using CHANGELOG.md from $CHANGELOG_PATH"
+            
+            # Extract release notes for this version from CHANGELOG.md
+            if grep -q "## \[$VERSION\]" "$CHANGELOG_PATH"; then
+              # Extract the section for this specific version
+              CHANGELOG_CONTENT=$(sed -n "/## \[$VERSION\]/,/## \[/p" "$CHANGELOG_PATH" | head -n -1 | tail -n +3)
+              echo "Found release notes for version $VERSION in CHANGELOG.md"
+            else
+              # Check for unreleased section
+              if grep -q "## \[Unreleased\]" "$CHANGELOG_PATH"; then
+                CHANGELOG_CONTENT=$(sed -n "/## \[Unreleased\]/,/## \[/p" "$CHANGELOG_PATH" | head -n -1 | tail -n +3)
+                echo "Using unreleased section from CHANGELOG.md (version $VERSION not found)"
+              else
+                CHANGELOG_CONTENT="No changelog content found for this version."
+                echo "Warning: No version $VERSION or Unreleased section found in CHANGELOG.md"
+              fi
+            fi
+          else
+            echo "No CHANGELOG.md found at $CHANGELOG_PATH, generating from git history"
+            
+            # Fallback to git log method
+            PREVIOUS_TAG=$(git tag -l "release/$ACTION_NAME/*" --sort=-version:refname | grep -v "^${{ github.ref_name }}$" | head -n 1)
+            
+            if [ -z "$PREVIOUS_TAG" ]; then
+              echo "No previous release found for $ACTION_NAME, using recent commits for this action"
+              CHANGELOG_CONTENT=$(git log --oneline --no-merges -- "actions/$ACTION_NAME/" | head -10 | sed 's/^/- /')
+            else
+              echo "Generating changelog from $PREVIOUS_TAG to ${{ github.ref_name }}"
+              CHANGELOG_CONTENT=$(git log --oneline --no-merges "$PREVIOUS_TAG"..HEAD -- "actions/$ACTION_NAME/" | sed 's/^/- /')
+            fi
+            
+            if [ -z "$CHANGELOG_CONTENT" ]; then
+              CHANGELOG_CONTENT="No specific changes detected for this action."
+            fi
           fi
-          
-          echo "Generating changelog from $PREVIOUS_TAG to ${{ github.ref_name }}"
-          
-          # Generate changelog
-          CHANGELOG=$(git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..${{ github.sha }} --no-merges)
           
           # Create release notes
           cat > release_notes.md << EOF
-          # Release ${{ github.ref_name }}
+          # $ACTION_NAME $VERSION
           
-          ## What's Changed
+          Release of the **$ACTION_NAME** action.
           
-          $CHANGELOG
+          ## Docker Image
           
-          ## Docker Images
+          \`\`\`bash
+          # Specific version
+          docker pull dudizimber/alert-reactions-$ACTION_NAME:$VERSION
           
-          The following Docker images have been updated:
-          
-          EOF
-          
-          # Find all actions and add to release notes
-          find actions -name "Dockerfile" -exec dirname {} \; | sort | while read action_dir; do
-            ACTION_NAME=$(basename "$action_dir")
-            echo "- \`dudizimber/alert-reactions-$ACTION_NAME:${{ github.ref_name }}\`" >> release_notes.md
-          done
-          
-          cat >> release_notes.md << EOF
+          # Latest stable
+          docker pull dudizimber/alert-reactions-$ACTION_NAME:latest
+          \`\`\`
           
           ## Usage
           
-          Update your AlertReaction specifications to use the new image tags:
+          Update your AlertReaction to use the new version:
           
           \`\`\`yaml
-          - name: my-action
-            image: dudizimber/alert-reactions-action-name:${{ github.ref_name }}
-            # ... rest of configuration
+          - name: $ACTION_NAME
+            image: dudizimber/alert-reactions-$ACTION_NAME:$VERSION
+            # ... rest of your configuration
           \`\`\`
           
-          **Full Changelog**: https://github.com/dudizimber/alert-reactions/compare/$PREVIOUS_TAG...${{ github.ref_name }}
+          ## What's Changed
+          
+          $CHANGELOG_CONTENT
+          
+          ## Documentation
+          
+          For complete usage instructions, see [actions/$ACTION_NAME/README.md](https://github.com/dudizimber/alert-reactions/tree/main/actions/$ACTION_NAME).
           EOF
+          
+          echo "Release notes generated:"
+          cat release_notes.md
 
-      - name: Create Release
-        id: create_release
+      - name: Create GitHub Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          release_name: ${{ needs.parse-release.outputs.action_name }} v${{ needs.parse-release.outputs.version }}
           body_path: release_notes.md
           draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ needs.parse-release.outputs.is_prerelease }}
 
   update-docs:
-    needs: create-release
+    needs: [parse-release, create-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Update action READMEs with new version
+      - name: Update action README with new version
         run: |
-          # Update all action READMEs to reference the new version
-          find actions -name "README.md" | while read readme; do
-            # Replace version references in usage examples
-            sed -i.bak "s|dudizimber/alert-reactions-[^:]*:v[0-9]*\.[0-9]*\.[0-9]*|dudizimber/alert-reactions-$(basename $(dirname $readme)):${{ github.ref_name }}|g" "$readme"
-            rm -f "$readme.bak"
-          done
+          ACTION_NAME="${{ needs.parse-release.outputs.action_name }}"
+          VERSION="${{ needs.parse-release.outputs.version }}"
+          README_PATH="actions/$ACTION_NAME/README.md"
+          
+          if [ -f "$README_PATH" ]; then
+            echo "Updating $README_PATH with version v$VERSION"
+            
+            # Update version references in the specific action's README
+            sed -i.bak "s|dudizimber/alert-reactions-$ACTION_NAME:v[0-9]*\.[0-9]*\.[0-9]*[^[:space:]]*|dudizimber/alert-reactions-$ACTION_NAME:v$VERSION|g" "$README_PATH"
+            sed -i.bak "s|dudizimber/alert-reactions-$ACTION_NAME:latest|dudizimber/alert-reactions-$ACTION_NAME:v$VERSION|g" "$README_PATH"
+            
+            # Clean up backup file
+            rm -f "$README_PATH.bak"
+            
+            echo "Updated image references in $README_PATH"
+          else
+            echo "Warning: README not found at $README_PATH"
+          fi
 
-      - name: Commit version updates
+      - name: Commit and push version updates
         run: |
+          ACTION_NAME="${{ needs.parse-release.outputs.action_name }}"
+          VERSION="${{ needs.parse-release.outputs.version }}"
+          
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add actions/*/README.md
-          if git diff --staged --quiet; then
-            echo "No version updates needed"
+          
+          if git diff --quiet; then
+            echo "No changes to commit"
           else
-            git commit -m "Update action READMEs with version ${{ github.ref_name }}"
+            git add "actions/$ACTION_NAME/README.md"
+            git commit -m "docs: update $ACTION_NAME README to version v$VERSION"
             git push
+            echo "Committed version updates for $ACTION_NAME"
           fi

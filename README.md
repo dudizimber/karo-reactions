@@ -174,10 +174,36 @@ docker run --rm \
   alert-reactions-webhook-sender:dev
 ```
 
-### Published Images
-All official images are published to Docker Hub:
-- Repository: `dudizimber/alert-reactions-<action-name>`
-- Tags: `latest`, `v1.0.0`, `v1.0`, `v1`, `main`
+### Published Images and Versioning
+Each action is versioned independently using semantic versioning. Images are published to Docker Hub when release tags are created:
+
+- **Repository Pattern**: `dudizimber/alert-reactions-<action-name>`
+- **Release Tag Format**: `release/<action-name>/<version>`
+- **Docker Tag Pattern**: Multiple tags are created for each release:
+  - `v1.0.0` (exact version)
+  - `v1.0` (minor version)  
+  - `v1` (major version)
+  - `latest` (latest stable release)
+
+**Examples**:
+```bash
+# Webhook Sender v1.2.0
+dudizimber/alert-reactions-webhook-sender:v1.2.0
+dudizimber/alert-reactions-webhook-sender:v1.2
+dudizimber/alert-reactions-webhook-sender:v1
+dudizimber/alert-reactions-webhook-sender:latest
+
+# GCP Pub/Sub v2.1.0
+dudizimber/alert-reactions-gcp-pubsub:v2.1.0
+dudizimber/alert-reactions-gcp-pubsub:v2.1
+dudizimber/alert-reactions-gcp-pubsub:v2
+```
+
+**Creating Releases**: Maintainers create releases by tagging:
+```bash
+git tag -a release/webhook-sender/v1.2.0 -m "Release webhook-sender v1.2.0"
+git push origin release/webhook-sender/v1.2.0
+```
 
 ## Contributing
 

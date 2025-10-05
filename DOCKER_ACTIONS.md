@@ -206,22 +206,109 @@ Each action's README.md must include:
 
 ## Release Process
 
+### Tagging Convention
+Each action has independent versioning using the format:
+```bash
+release/<action-name>/<version>
+```
+
+Examples:
+- `release/webhook-sender/v1.0.0`
+- `release/gcp-pubsub/v1.2.1`
+- `release/slack-notify/v2.0.0-beta1`
+
 ### Creating a Release
-1. Update version in relevant files
-2. Update CHANGELOG.md
-3. Create and push a git tag:
+1. Update version references in the action's README.md
+2. Update any CHANGELOG or version files specific to the action
+3. Create and push a release tag:
    ```bash
-   git tag -a v1.0.0 -m "Release v1.0.0"
-   git push origin v1.0.0
+   # For webhook-sender version 1.0.0
+   git tag -a release/webhook-sender/v1.0.0 -m "Release webhook-sender v1.0.0"
+   git push origin release/webhook-sender/v1.0.0
    ```
-4. GitHub Actions will automatically build and publish the image
+4. GitHub Actions will automatically:
+   - Build and publish the Docker image with proper tags
+   - Create a GitHub release with changelog
+   - Update documentation
+
+### Docker Image Tags
+When you create a release tag, the following Docker tags are created:
+- `dudizimber/alert-reactions-<action>:v1.0.0` (exact version)
+- `dudizimber/alert-reactions-<action>:v1.0` (minor version)
+- `dudizimber/alert-reactions-<action>:v1` (major version)
+- `dudizimber/alert-reactions-<action>:latest` (latest stable)
 
 ### Pre-release Testing
-Before tagging a release:
-1. Test locally with sample alerts
-2. Run unit tests: `go test ./...`
-3. Build and test Docker image
-4. Validate with real Kubernetes AlertReaction
+Before creating a release tag:
+1. Test locally with the action's `test.sh` script:
+   ```bash
+   cd actions/your-action
+   docker build -t test-action:dev .
+   ./test.sh test-action:dev
+   ```
+2. Validate with real Kubernetes AlertReaction
+3. Ensure documentation is up to date
+
+### Changelog Maintenance
+Each Docker action **must** maintain a `CHANGELOG.md` file following the [Keep a Changelog](https://keepachangelog.com/) format:
+
+```markdown
+# Changelog
+
+## [Unreleased]
+
+### Added
+- New feature descriptions
+
+### Changed
+- Changes in existing functionality
+
+### Fixed
+- Bug fixes
+
+## [1.0.0] - 2024-01-15
+
+### Added
+- Initial release
+```
+
+**Workflow**:
+1. **During development**: Add changes to the `[Unreleased]` section
+2. **Before release**: Use the helper script to prepare the release:
+   ```bash
+   ./scripts/prepare-release.sh webhook-sender v1.2.0
+   ```
+3. **The script will**:
+   - Move unreleased changes to a versioned section
+   - Create a new empty unreleased section
+   - Generate and push the release tag
+   - Trigger automated Docker build and GitHub release
+
+### Helper Script Usage
+```bash
+# Edit changelog interactively
+./scripts/prepare-release.sh webhook-sender edit
+
+# Validate changelog format
+./scripts/prepare-release.sh webhook-sender validate
+
+# Prepare a release (interactive)
+./scripts/prepare-release.sh webhook-sender v1.2.0
+
+# Show status of all actions
+./scripts/prepare-release.sh status
+```
+
+### Pre-releases
+For alpha, beta, or release candidate versions:
+```bash
+./scripts/prepare-release.sh webhook-sender v1.0.0-beta1
+```
+Or manually:
+```bash
+git tag -a release/webhook-sender/v1.0.0-beta1 -m "Release webhook-sender v1.0.0-beta1"
+```
+These will be marked as pre-releases in GitHub and tagged accordingly.
 
 ## Supported Languages
 

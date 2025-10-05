@@ -81,6 +81,16 @@ Your action's README.md must include:
 - **Exit codes**: Exit 0 for success, non-zero for failure
 - **Coverage**: Test success cases, error handling, and configuration validation
 
+### 5. Changelog Requirements (Docker-based Actions)
+
+**Every Docker-based action MUST include a `CHANGELOG.md` file** following the [Keep a Changelog](https://keepachangelog.com/) format:
+
+- **Location**: In the action's root directory (`actions/<action-name>/CHANGELOG.md`)
+- **Format**: Must follow Keep a Changelog structure with `[Unreleased]` section
+- **Maintenance**: Add all notable changes to the `[Unreleased]` section during development
+- **Sections**: Use standard sections: Added, Changed, Deprecated, Removed, Fixed, Security
+- **Validation**: Use `./scripts/prepare-release.sh <action> validate` to check format
+
 Example test.sh structure:
 ```bash
 #!/bin/bash
@@ -96,7 +106,7 @@ docker run --rm -e TEST_VAR="value" "$IMAGE_NAME"
 echo "✅ All tests passed!"
 ```
 
-### 5. Action Specification Guidelines
+### 6. Action Specification Guidelines
 
 When creating your action specification:
 
@@ -121,7 +131,7 @@ When creating your action specification:
 - Use least-privilege principles
 - Avoid running as root when possible
 
-### 5. Action Template
+### 7. Action Template
 
 Here's a template for creating new actions:
 
@@ -157,7 +167,7 @@ Here's a template for creating new actions:
       memory: "128Mi"
 ```
 
-### 6. Testing Your Action
+### 8. Testing Your Action
 
 Before submitting:
 
@@ -166,7 +176,7 @@ Before submitting:
 3. **Test error scenarios** (missing secrets, network issues)
 4. **Check logs** for any unexpected output or errors
 
-### 7. Documentation Standards
+### 9. Documentation Standards
 
 #### README.md Format:
 ```markdown
@@ -202,23 +212,26 @@ Complete example showing the action in context.
 Any setup required before using this action.
 ```
 
-### 8. Submission Process
+### 10. Submission Process
 
 1. **Fork** this repository
 2. **Create a new branch** for your action
 3. **Create your action directory** with all required files:
    - README.md with complete documentation
    - **test.sh script** (for Docker-based actions) 
+   - **CHANGELOG.md file** (for Docker-based actions)
    - Dockerfile and source code (for Docker-based actions)
 4. **Test thoroughly** using your test.sh script
-5. **Verify CI tests pass** by running `./test.sh your-image:dev` locally
-6. **Submit a pull request** with:
+5. **Validate changelog** using `./scripts/prepare-release.sh <action> validate`
+6. **Verify CI tests pass** by running `./test.sh your-image:dev` locally
+7. **Submit a pull request** with:
    - Clear description of what the action does
    - Evidence that `test.sh` passes locally
+   - Evidence that changelog validation passes
    - Test results and validation steps
    - Any special setup requirements
 
-### 9. Review Criteria
+### 11. Review Criteria
 
 Your action will be reviewed for:
 
@@ -227,8 +240,9 @@ Your action will be reviewed for:
 - **Documentation**: Is it clear and complete?
 - **Resource efficiency**: Reasonable resource usage?
 - **Code quality**: Clean, maintainable implementation?
+- **Changelog**: Proper format and maintenance approach?
 
-### 10. Common Alert Data Fields
+### 12. Common Alert Data Fields
 
 Here are commonly available alert fields you can reference:
 
@@ -253,7 +267,7 @@ endsAt               # When alert ended (for resolved alerts)
 .                    # Complete alert JSON
 ```
 
-### 11. Best Practices
+### 13. Best Practices
 
 #### Security
 - Use Kubernetes secrets for sensitive data
@@ -274,6 +288,85 @@ endsAt               # When alert ended (for resolved alerts)
 - Use clear, descriptive names
 - Comment complex logic
 - Keep actions focused on single responsibilities
+
+## Release Process for Maintainers
+
+### Creating Action Releases
+
+Each action is versioned independently using semantic versioning. The release process uses per-action changelogs:
+
+#### 1. Maintain Changelog During Development
+Every Docker action must have a `CHANGELOG.md` file. Add changes to the `[Unreleased]` section as you develop:
+
+```markdown
+## [Unreleased]
+
+### Added
+- New retry mechanism for failed requests
+- Support for custom timeout values
+
+### Fixed
+- Memory leak in connection pooling
+```
+
+#### 2. Prepare Release Using Helper Script
+Use the provided script to prepare releases:
+
+```bash
+# Validate changelog format
+./scripts/prepare-release.sh webhook-sender validate
+
+# Prepare release (interactive process)
+./scripts/prepare-release.sh webhook-sender v1.2.0
+```
+
+The script will:
+- Validate changelog format
+- Move unreleased changes to a versioned section
+- Create new empty unreleased section
+- Show preview of release notes
+- Create and push the release tag (with confirmation)
+
+#### 3. Manual Release Process (Alternative)
+If you prefer manual control:
+
+```bash
+# 1. Edit changelog manually
+./scripts/prepare-release.sh webhook-sender edit
+
+# 2. Create release tag
+git tag -a release/webhook-sender/v1.2.0 -m "Release webhook-sender v1.2.0"
+git push origin release/webhook-sender/v1.2.0
+```
+
+#### 4. Automated Process
+The GitHub Actions pipeline will automatically:
+- Build and test the Docker image
+- Publish to Docker Hub with multiple tags
+- Create a GitHub release using the changelog content
+- Update documentation with new version references
+
+### Version Bump Guidelines
+
+Follow semantic versioning:
+- **MAJOR** (`v2.0.0`): Breaking changes to action interface or behavior
+- **MINOR** (`v1.1.0`): New features, backward compatible
+- **PATCH** (`v1.0.1`): Bug fixes, backward compatible
+
+### Pre-releases
+
+For beta or release candidate versions:
+```bash
+git tag -a release/gcp-pubsub/v2.0.0-beta1 -m "Release gcp-pubsub v2.0.0-beta1"
+```
+
+### Hotfixes
+
+For urgent fixes to production versions:
+1. Create a hotfix branch from the release tag
+2. Make minimal necessary changes
+3. Create a patch release tag
+4. The changes should be merged back to main
 
 ## Questions?
 
