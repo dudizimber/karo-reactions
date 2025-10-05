@@ -248,12 +248,8 @@ func sanitizeWorkflowName(name string) string {
 
 	// Remove any characters that aren't alphanumeric, underscore, or hyphen
 	var result strings.Builder
-	for i, r := range name {
+	for _, r := range name {
 		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_' || r == '-' {
-			result.WriteRune(r)
-		} else if i == 0 && (r >= '0' && r <= '9') {
-			// Can't start with a number, prepend underscore
-			result.WriteString("_")
 			result.WriteRune(r)
 		}
 	}
