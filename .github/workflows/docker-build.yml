@@ -190,13 +190,34 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
+  discover-all-actions:
+    runs-on: ubuntu-latest
+    outputs:
+      all_actions_json: ${{ steps.discover.outputs.all_actions_json }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Discover all actions
+        id: discover
+        run: |
+          # Find all action directories (any directory under actions/)
+          ALL_ACTIONS=$(find actions -maxdepth 1 -type d | grep -v '^actions$' | sort)
+          
+          # Convert to JSON array for matrix
+          ALL_ACTIONS_JSON=$(echo $ALL_ACTIONS | tr ' ' '\n' | grep -v '^$' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          
+          echo "all_actions_json=$ALL_ACTIONS_JSON" >> $GITHUB_OUTPUT
+          echo "All actions: $ALL_ACTIONS"
+          echo "Actions JSON: $ALL_ACTIONS_JSON"
+
   test-actions:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.actions_json != '[]'
+    needs: discover-all-actions
+    if: needs.discover-all-actions.outputs.all_actions_json != '[]'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        action: ${{ fromJson(needs.detect-changes.outputs.actions_json) }}
+        action: ${{ fromJson(needs.discover-all-actions.outputs.all_actions_json) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -208,10 +229,23 @@ jobs:
           echo "name=$ACTION_NAME" >> $GITHUB_OUTPUT
           echo "path=${{ matrix.action }}" >> $GITHUB_OUTPUT
 
+      - name: Determine action type
+        id: action-type
+        run: |
+          if [ -f "${{ steps.action.outputs.path }}/Dockerfile" ]; then
+            echo "type=docker" >> $GITHUB_OUTPUT
+            echo "Action ${{ steps.action.outputs.name }} is Docker-based"
+          else
+            echo "type=shell" >> $GITHUB_OUTPUT
+            echo "Action ${{ steps.action.outputs.name }} is shell-based"
+          fi
+
       - name: Set up Docker Buildx
+        if: steps.action-type.outputs.type == 'docker'
         uses: docker/setup-buildx-action@v3
 
       - name: Build test image
+        if: steps.action-type.outputs.type == 'docker'
         uses: docker/build-push-action@v5
         with:
           context: ${{ steps.action.outputs.path }}
@@ -220,9 +254,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Run action tests
+      - name: Test Docker-based action
+        if: steps.action-type.outputs.type == 'docker'
         run: |
-          echo "Running tests for action: ${{ steps.action.outputs.name }}"
+          echo "Running tests for Docker action: ${{ steps.action.outputs.name }}"
           
           # Check if test.sh exists
           if [ -f "${{ steps.action.outputs.path }}/test.sh" ]; then
@@ -238,5 +273,57 @@ jobs:
             docker run --rm \
               -e WEBHOOK_URL="https://httpbin.org/post" \
               -e ALERT_JSON='{"status":"firing","labels":{"alertname":"TestAlert","severity":"warning"},"annotations":{"summary":"Test alert"}}' \
-              test-${{ steps.action.outputs.name }}:latest || echo "Action test completed"
+              test-${{ steps.action.outputs.name }}:latest || echo "Docker action test completed"
+          fi
+
+      - name: Test shell-based action
+        if: steps.action-type.outputs.type == 'shell'
+        run: |
+          echo "Testing shell-based action: ${{ steps.action.outputs.name }}"
+          
+          # Check if test.sh exists
+          if [ -f "${{ steps.action.outputs.path }}/test.sh" ]; then
+            echo "Found test.sh, running action-specific tests..."
+            cd "${{ steps.action.outputs.path }}"
+            chmod +x test.sh
+            
+            # Run the test script (shell actions don't need image parameter)
+            ./test.sh
+          else
+            echo "No test.sh found, running validation checks..."
+            
+            # Check required files exist
+            if [ ! -f "${{ steps.action.outputs.path }}/README.md" ]; then
+              echo "❌ Missing README.md"
+              exit 1
+            fi
+            
+            # Validate README.md contains required sections
+            README_PATH="${{ steps.action.outputs.path }}/README.md"
+            
+            if ! grep -q "# " "$README_PATH"; then
+              echo "❌ README.md missing main title"
+              exit 1
+            fi
+            
+            if ! grep -q -i "usage\|example" "$README_PATH"; then
+              echo "❌ README.md missing usage/example section"
+              exit 1
+            fi
+            
+            # Check if action.yaml exists (optional)
+            if [ -f "${{ steps.action.outputs.path }}/action.yaml" ]; then
+              echo "✅ Found action.yaml specification"
+              
+              # Basic YAML syntax validation
+              if command -v python3 >/dev/null 2>&1; then
+                python3 -c "import yaml; yaml.safe_load(open('${{ steps.action.outputs.path }}/action.yaml'))" || {
+                  echo "❌ Invalid YAML syntax in action.yaml"
+                  exit 1
+                }
+                echo "✅ action.yaml has valid YAML syntax"
+              fi
+            fi
+            
+            echo "✅ Shell-based action validation passed"
           fi
