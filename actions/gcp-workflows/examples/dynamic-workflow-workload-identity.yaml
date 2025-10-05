@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alert-workflows-sa
+  namespace: monitoring
+  annotations:
+    iam.gke.io/gcp-service-account: workflows-executor@my-gcp-project.iam.gserviceaccount.com
+---
+apiVersion: alertreaction.io/v1alpha1
+kind: AlertReaction
+metadata:
+  name: dynamic-workflow-example
+  namespace: monitoring
+spec:
+  serviceAccountName: alert-workflows-sa  # Use Workload Identity
+  alertName: GenericAlert  # Match alerts that have workflow field in labels
+  actions:
+  - name: execute-alert-specific-workflow
+    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    env:
+    - name: GCP_PROJECT_ID
+      value: "my-gcp-project"
+    - name: GCP_LOCATION
+      value: "us-central1"
+    # Extract workflow name from alert labels.workflow field
+    - name: WORKFLOW_NAME_FIELD
+      value: "labels.workflow"
+    - name: TIMEOUT_SECONDS
+      value: "300"
+    - name: WAIT_FOR_COMPLETION
+      value: "false"  # Don't wait for completion to avoid blocking
+    - name: WORKFLOW_SOURCE
+      value: "production-k8s-cluster"
+    # Complete alert data passed to workflow
+    - name: ALERT_JSON
+      valueFrom:
+        alertRef:
+          fieldPath: "."
+    # Additional environment variables for fallback
+    - name: ALERT_NAME
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.alertname"
+    - name: ALERT_STATUS
+      valueFrom:
+        alertRef:
+          fieldPath: "status"
+    - name: ALERT_SEVERITY
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.severity"
+    - name: INSTANCE
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.instance"
+    - name: ALERT_SUMMARY
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.summary"
+    - name: ALERT_DESCRIPTION
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.description"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"

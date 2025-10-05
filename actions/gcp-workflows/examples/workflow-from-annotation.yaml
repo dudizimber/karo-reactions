@@ -1,0 +1,71 @@
+apiVersion: alertreaction.io/v1alpha1
+kind: AlertReaction
+metadata:
+  name: workflow-from-annotation-example
+  namespace: monitoring
+spec:
+  alertName: CustomAlert
+  actions:
+  - name: execute-workflow-from-annotation
+    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    env:
+    - name: GCP_PROJECT_ID
+      value: "my-gcp-project"
+    - name: GCP_LOCATION
+      value: "us-central1"
+    # Extract workflow name from alert annotations.workflow_name field
+    - name: WORKFLOW_NAME_FIELD
+      value: "annotations.workflow_name"
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: "/etc/gcp/service-account.json"
+    - name: TIMEOUT_SECONDS
+      value: "300"
+    - name: WAIT_FOR_COMPLETION
+      value: "true"
+    - name: WORKFLOW_SOURCE
+      value: "production-k8s-cluster"
+    # Complete alert data
+    - name: ALERT_JSON
+      valueFrom:
+        alertRef:
+          fieldPath: "."
+    # Fallback environment variables
+    - name: ALERT_NAME
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.alertname"
+    - name: ALERT_STATUS
+      valueFrom:
+        alertRef:
+          fieldPath: "status"
+    - name: ALERT_SEVERITY
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.severity"
+    - name: INSTANCE
+      valueFrom:
+        alertRef:
+          fieldPath: "labels.instance"
+    - name: ALERT_SUMMARY
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.summary"
+    - name: ALERT_DESCRIPTION
+      valueFrom:
+        alertRef:
+          fieldPath: "annotations.description"
+    volumeMounts:
+    - name: gcp-service-account
+      mountPath: /etc/gcp
+      readOnly: true
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"
+  volumes:
+  - name: gcp-service-account
+    secret:
+      secretName: gcp-workflows-credentials
