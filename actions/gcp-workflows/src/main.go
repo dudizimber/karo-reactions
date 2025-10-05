@@ -222,11 +222,11 @@ func extractFieldFromAlert(alert *AlertData, fieldPath string) string {
 func extractFieldFromEnv(fieldPath string) string {
 	// Map common field paths to environment variables
 	envMappings := map[string]string{
-		"labels.alertname":            "ALERT_NAME",
-		"labels.workflow":             "WORKFLOW_FROM_LABEL",
-		"annotations.workflow":        "WORKFLOW_FROM_ANNOTATION",
-		"annotations.workflow_name":   "WORKFLOW_NAME_FROM_ANNOTATION",
-		"status":                      "ALERT_STATUS",
+		"labels.alertname":          "ALERT_NAME",
+		"labels.workflow":           "WORKFLOW_FROM_LABEL",
+		"annotations.workflow":      "WORKFLOW_FROM_ANNOTATION",
+		"annotations.workflow_name": "WORKFLOW_NAME_FROM_ANNOTATION",
+		"status":                    "ALERT_STATUS",
 	}
 
 	if envVar, exists := envMappings[fieldPath]; exists {
@@ -245,7 +245,7 @@ func sanitizeWorkflowName(name string) string {
 	name = strings.ToLower(name)
 	name = strings.ReplaceAll(name, " ", "-")
 	name = strings.ReplaceAll(name, ".", "-")
-	
+
 	// Remove any characters that aren't alphanumeric, underscore, or hyphen
 	var result strings.Builder
 	for i, r := range name {
@@ -259,7 +259,7 @@ func sanitizeWorkflowName(name string) string {
 	}
 
 	sanitized := result.String()
-	
+
 	// Ensure it starts with a letter or underscore
 	if len(sanitized) > 0 && sanitized[0] >= '0' && sanitized[0] <= '9' {
 		sanitized = "_" + sanitized
