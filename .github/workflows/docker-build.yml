@@ -95,6 +95,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.actions_json != '[]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     strategy:
       matrix:
         action: ${{ fromJson(needs.detect-changes.outputs.actions_json) }}
