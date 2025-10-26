@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# GCP Workflows Setup Script for Alert Reactions
+# GCP Workflows Setup Script for Karo
 # This script helps set up the necessary GCP resources and Kubernetes configurations
 
 set -e
@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 PROJECT_ID=""
 LOCATION="us-central1"
 SA_NAME="workflows-executor"
-SA_DISPLAY_NAME="Workflows Executor for Alert Reactions"
+SA_DISPLAY_NAME="Workflows Executor for Karo"
 K8S_NAMESPACE="monitoring"
 K8S_SA_NAME="alert-workflows-sa"
 USE_WORKLOAD_IDENTITY=false
@@ -296,9 +296,9 @@ EOF
     log_info "Sample workflow 'sample-alert-handler' created ✓"
 }
 
-# Generate example AlertReaction
+# Generate example Karo
 generate_example_alertreaction() {
-    log_info "Generating example AlertReaction YAML..."
+    log_info "Generating example Karo YAML..."
     
     if [[ "$USE_WORKLOAD_IDENTITY" == true ]]; then
         EXAMPLE_FILE="example-workload-identity-alertreaction.yaml"
@@ -311,7 +311,7 @@ metadata:
   annotations:
     iam.gke.io/gcp-service-account: ${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 ---
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: sample-workflow-reaction
@@ -321,7 +321,7 @@ spec:
   alertName: SampleAlert
   actions:
   - name: execute-sample-workflow
-    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
     env:
     - name: GCP_PROJECT_ID
       value: "$PROJECT_ID"
@@ -350,7 +350,7 @@ EOF
     else
         EXAMPLE_FILE="example-service-account-alertreaction.yaml"
         cat > "$EXAMPLE_FILE" << EOF
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: sample-workflow-reaction
@@ -359,7 +359,7 @@ spec:
   alertName: SampleAlert
   actions:
   - name: execute-sample-workflow
-    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
     env:
     - name: GCP_PROJECT_ID
       value: "$PROJECT_ID"
@@ -397,7 +397,7 @@ spec:
 EOF
     fi
     
-    log_info "Example AlertReaction saved to: $EXAMPLE_FILE"
+    log_info "Example Karo saved to: $EXAMPLE_FILE"
 }
 
 # Print summary
@@ -420,7 +420,7 @@ print_summary() {
     echo "  Sample Workflow: sample-alert-handler"
     echo ""
     echo "Next steps:"
-    echo "1. Review and apply the generated AlertReaction:"
+    echo "1. Review and apply the generated Karo:"
     if [[ "$USE_WORKLOAD_IDENTITY" == true ]]; then
         echo "   kubectl apply -f example-workload-identity-alertreaction.yaml"
     else
@@ -430,12 +430,12 @@ print_summary() {
     echo "2. Test the workflow:"
     echo "   gcloud workflows executions list --workflow=sample-alert-handler --location=$LOCATION --project=$PROJECT_ID"
     echo ""
-    echo "3. Customize your AlertReaction configurations based on your alert rules"
+    echo "3. Customize your Karo configurations based on your alert rules"
 }
 
 # Main execution
 main() {
-    log_info "Starting GCP Workflows setup for Alert Reactions..."
+    log_info "Starting GCP Workflows setup for Karo..."
     echo "Project: $PROJECT_ID"
     echo "Location: $LOCATION"
     echo "Authentication: $(if [[ "$USE_WORKLOAD_IDENTITY" == true ]]; then echo "Workload Identity"; else echo "Service Account Key"; fi)"

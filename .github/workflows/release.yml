@@ -120,10 +120,10 @@ jobs:
           
           \`\`\`bash
           # Specific version
-          docker pull dudizimber/alert-reactions-$ACTION_NAME:$VERSION
+          docker pull dudizimber/karo-reactions-$ACTION_NAME:$VERSION
           
           # Latest stable
-          docker pull dudizimber/alert-reactions-$ACTION_NAME:latest
+          docker pull dudizimber/karo-reactions-$ACTION_NAME:latest
           \`\`\`
           
           ## Usage
@@ -132,7 +132,7 @@ jobs:
           
           \`\`\`yaml
           - name: $ACTION_NAME
-            image: dudizimber/alert-reactions-$ACTION_NAME:$VERSION
+            image: dudizimber/karo-reactions-$ACTION_NAME:$VERSION
             # ... rest of your configuration
           \`\`\`
           
@@ -142,7 +142,7 @@ jobs:
           
           ## Documentation
           
-          For complete usage instructions, see [actions/$ACTION_NAME/README.md](https://github.com/dudizimber/alert-reactions/tree/main/actions/$ACTION_NAME).
+          For complete usage instructions, see [actions/$ACTION_NAME/README.md](https://github.com/dudizimber/karo-reactions/tree/main/actions/$ACTION_NAME).
           EOF
           
           echo "Release notes generated:"
@@ -179,8 +179,8 @@ jobs:
             echo "Updating $README_PATH with version v$VERSION"
             
             # Update version references in the specific action's README
-            sed -i.bak "s|dudizimber/alert-reactions-$ACTION_NAME:v[0-9]*\.[0-9]*\.[0-9]*[^[:space:]]*|dudizimber/alert-reactions-$ACTION_NAME:v$VERSION|g" "$README_PATH"
-            sed -i.bak "s|dudizimber/alert-reactions-$ACTION_NAME:latest|dudizimber/alert-reactions-$ACTION_NAME:v$VERSION|g" "$README_PATH"
+            sed -i.bak "s|dudizimber/karo-reactions-$ACTION_NAME:v[0-9]*\.[0-9]*\.[0-9]*[^[:space:]]*|dudizimber/karo-reactions-$ACTION_NAME:v$VERSION|g" "$README_PATH"
+            sed -i.bak "s|dudizimber/karo-reactions-$ACTION_NAME:latest|dudizimber/karo-reactions-$ACTION_NAME:v$VERSION|g" "$README_PATH"
             
             # Clean up backup file
             rm -f "$README_PATH.bak"

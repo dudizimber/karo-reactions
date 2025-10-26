@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GCP Pub/Sub Setup Script
-# This script sets up the necessary GCP resources for the alert-reactions GCP Pub/Sub action
+# This script sets up the necessary GCP resources for the karo-reactions GCP Pub/Sub action
 
 set -e
 
@@ -45,7 +45,7 @@ if gcloud iam service-accounts describe "${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.i
     echo "Service account $SERVICE_ACCOUNT_NAME already exists"
 else
     gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
-        --display-name="Alert Reactions Pub/Sub Publisher" \
+        --display-name="Karo Pub/Sub Publisher" \
         --description="Service account for publishing alert data to Pub/Sub"
     echo "Service account $SERVICE_ACCOUNT_NAME created successfully"
 fi

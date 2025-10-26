@@ -1,4 +1,4 @@
-module github.com/dudizimber/alert-reactions/gcp-pubsub
+module github.com/dudizimber/karo-reactions/gcp-pubsub
 
 go 1.24.0
 

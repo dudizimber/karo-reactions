@@ -127,7 +127,7 @@ jobs:
         id: meta
         run: |
           ACTION_NAME="${{ steps.action.outputs.name }}"
-          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.REGISTRY_USERNAME }}/alert-reactions-$ACTION_NAME"
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.REGISTRY_USERNAME }}/karo-reactions-$ACTION_NAME"
           
           if [ "${{ needs.detect-changes.outputs.is_release }}" == "true" ] && [ "$ACTION_NAME" == "${{ needs.detect-changes.outputs.release_action }}" ]; then
             # Release build - use semantic versioning
@@ -166,9 +166,9 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: |
-            org.opencontainers.image.title=Alert Reactions - ${{ steps.action.outputs.name }}
-            org.opencontainers.image.description=Action for k8s-alert-reaction-operator
-            org.opencontainers.image.source=https://github.com/dudizimber/alert-reactions
+            org.opencontainers.image.title=Karo - ${{ steps.action.outputs.name }}
+            org.opencontainers.image.description=Action for Karo (Kubernetes Alert Reaction Operator)
+            org.opencontainers.image.source=https://github.com/dudizimber/karo-reactions
             org.opencontainers.image.version=${{ needs.detect-changes.outputs.release_version || 'main' }}
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha

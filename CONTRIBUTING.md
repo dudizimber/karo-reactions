@@ -1,6 +1,6 @@
-# Contributing to Alert Reactions
+# Contributing to Karo Reactions
 
-Thank you for your interest in contributing to the official Alert Reactions repository! This guide will help you create new actions and contribute effectively.
+Thank you for your interest in contributing to the official Karo Reactions repository! This guide will help you create new actions and contribute effectively.
 
 ## Action Types
 
@@ -16,7 +16,7 @@ Simple actions using existing container images with shell commands. No compilati
 Complex actions with custom code requiring compilation into Docker images.
 - **Examples**: HTTP webhooks, data processing, integrations
 - **Languages**: Go, Python, Node.js, Rust, etc.
-- **Images**: Automatically built and published to `dudizimber/alert-reactions-<name>`
+- **Images**: Automatically built and published to `dudizimber/karo-reactions-<name>`
 - **CI/CD**: GitHub Actions build pipeline
 
 **For Docker-based actions, see `DOCKER_ACTIONS.md` for detailed guidelines.**

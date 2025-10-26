@@ -25,13 +25,13 @@ actions/
 
 All published images follow the pattern:
 ```
-dudizimber/alert-reactions-<action-name>:<version>
+dudizimber/karo-reactions-<action-name>:<version>
 ```
 
 Examples:
-- `dudizimber/alert-reactions-webhook-sender:v1.0.0`
-- `dudizimber/alert-reactions-slack-notify:v1.2.1`
-- `dudizimber/alert-reactions-scale-deployment:v2.0.0`
+- `dudizimber/karo-reactions-webhook-sender:v1.0.0`
+- `dudizimber/karo-reactions-slack-notify:v1.2.1`
+- `dudizimber/karo-reactions-scale-deployment:v2.0.0`
 
 ## Versioning Strategy
 
@@ -59,7 +59,7 @@ All Docker images are built automatically via GitHub Actions when:
 For local development:
 ```bash
 cd actions/action-name
-docker build -t dudizimber/alert-reactions-action-name:dev .
+docker build -t dudizimber/karo-reactions-action-name:dev .
 ```
 
 ## Dockerfile Requirements
@@ -91,9 +91,9 @@ CMD ["./app"]
 ### Labels
 Include standard labels:
 ```dockerfile
-LABEL org.opencontainers.image.title="Alert Reaction: Action Name"
+LABEL org.opencontainers.image.title="Karo: Action Name"
 LABEL org.opencontainers.image.description="Description of what this action does"
-LABEL org.opencontainers.image.source="https://github.com/dudizimber/alert-reactions"
+LABEL org.opencontainers.image.source="https://github.com/dudizimber/karo-reactions"
 LABEL org.opencontainers.image.vendor="dudizimber"
 ```
 
@@ -233,10 +233,10 @@ Examples:
 
 ### Docker Image Tags
 When you create a release tag, the following Docker tags are created:
-- `dudizimber/alert-reactions-<action>:v1.0.0` (exact version)
-- `dudizimber/alert-reactions-<action>:v1.0` (minor version)
-- `dudizimber/alert-reactions-<action>:v1` (major version)
-- `dudizimber/alert-reactions-<action>:latest` (latest stable)
+- `dudizimber/karo-reactions-<action>:v1.0.0` (exact version)
+- `dudizimber/karo-reactions-<action>:v1.0` (minor version)
+- `dudizimber/karo-reactions-<action>:v1` (major version)
+- `dudizimber/karo-reactions-<action>:latest` (latest stable)
 
 ### Pre-release Testing
 Before creating a release tag:

@@ -1,4 +1,4 @@
-module github.com/dudizimber/alert-reactions/actions/gcp-workflows
+module github.com/dudizimber/karo-reactions/actions/gcp-workflows
 
 go 1.24.0
 

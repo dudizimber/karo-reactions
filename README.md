@@ -1,15 +1,15 @@
-# Alert Reactions - Official Actions Repository
+# Karo Reactions - Official Actions Repository
 
-This repository contains officially supported Reaction Actions for the [dudizimber/k8s-alert-reaction-operator](https://github.com/dudizimber/k8s-alert-reaction-operator).
+This repository contains officially supported Reaction Actions for [Karo (Kubernetes Alert Reaction Operator)](https://github.com/dudizimber/karo).
 
 ## Overview
 
-The k8s-alert-reaction-operator allows you to define automated responses to Kubernetes alerts using custom resources called `AlertReaction`. Each AlertReaction can contain multiple actions that are executed as Kubernetes pods when an alert is triggered.
+Karo allows you to define automated responses to Kubernetes alerts using custom resources called `AlertReaction`. Each AlertReaction can contain multiple actions that are executed as Kubernetes pods when an alert is triggered.
 
 ## Repository Structure
 
 ```
-alert-reactions/
+karo-reactions/
 ├── .github/
 │   └── workflows/            # CI/CD pipelines for building Docker images
 ├── actions/                  # Directory containing all available actions
@@ -43,7 +43,7 @@ Actions are essentially Pod specifications that get executed when an alert is tr
 Here's an example of how actions are used in an AlertReaction:
 
 ```yaml
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: high-cpu-alert-reaction
@@ -104,7 +104,7 @@ Complex actions with custom code that require compilation into Docker images. Th
 **Examples**: 
 - Webhook Sender (`actions/webhook-sender/`) - HTTP webhooks with authentication
 - GCP Pub/Sub (`actions/gcp-pubsub/`) - Google Cloud Pub/Sub publishing
-- **Image Pattern**: `dudizimber/alert-reactions-<action-name>:<version>`
+- **Image Pattern**: `dudizimber/karo-reactions-<action-name>:<version>`
 - **Language**: Go (with support for other languages)
 - **Features**: Production-ready with security hardening and error handling
 
@@ -119,13 +119,13 @@ Location: `actions/echo/`
 A robust HTTP webhook sender that posts alert data to external endpoints in JSON format.
 
 Location: `actions/webhook-sender/`  
-Image: `dudizimber/alert-reactions-webhook-sender:latest`
+Image: `dudizimber/karo-reactions-webhook-sender:latest`
 
 ### GCP Pub/Sub Action (Docker-based)
 Publishes alert data to Google Cloud Pub/Sub topics for event-driven architectures and downstream processing.
 
 Location: `actions/gcp-pubsub/`  
-Image: `dudizimber/alert-reactions-gcp-pubsub:latest`
+Image: `dudizimber/karo-reactions-gcp-pubsub:latest`
 
 ## Using Actions
 
@@ -143,7 +143,7 @@ To use a Docker-based action:
 
 1. Browse the `actions/` directory to find the action you need
 2. Read the action's README.md for complete configuration examples
-3. Use the published Docker image: `dudizimber/alert-reactions-<action-name>:<version>`
+3. Use the published Docker image: `dudizimber/karo-reactions-<action-name>:<version>`
 4. Configure required environment variables (usually from secrets)
 5. Set appropriate resource limits
 
@@ -165,19 +165,19 @@ To build and test an action locally:
 cd actions/webhook-sender
 
 # Build the Docker image
-docker build -t alert-reactions-webhook-sender:dev .
+docker build -t karo-reactions-webhook-sender:dev .
 
 # Test with sample data
 docker run --rm \
   -e WEBHOOK_URL="https://httpbin.org/post" \
   -e ALERT_JSON='{"labels":{"alertname":"TestAlert"}}' \
-  alert-reactions-webhook-sender:dev
+  karo-reactions-webhook-sender:dev
 ```
 
 ### Published Images and Versioning
 Each action is versioned independently using semantic versioning. Images are published to Docker Hub when release tags are created:
 
-- **Repository Pattern**: `dudizimber/alert-reactions-<action-name>`
+- **Repository Pattern**: `dudizimber/karo-reactions-<action-name>`
 - **Release Tag Format**: `release/<action-name>/<version>`
 - **Docker Tag Pattern**: Multiple tags are created for each release:
   - `v1.0.0` (exact version)
@@ -188,15 +188,15 @@ Each action is versioned independently using semantic versioning. Images are pub
 **Examples**:
 ```bash
 # Webhook Sender v1.2.0
-dudizimber/alert-reactions-webhook-sender:v1.2.0
-dudizimber/alert-reactions-webhook-sender:v1.2
-dudizimber/alert-reactions-webhook-sender:v1
-dudizimber/alert-reactions-webhook-sender:latest
+dudizimber/karo-reactions-webhook-sender:v1.2.0
+dudizimber/karo-reactions-webhook-sender:v1.2
+dudizimber/karo-reactions-webhook-sender:v1
+dudizimber/karo-reactions-webhook-sender:latest
 
 # GCP Pub/Sub v2.1.0
-dudizimber/alert-reactions-gcp-pubsub:v2.1.0
-dudizimber/alert-reactions-gcp-pubsub:v2.1
-dudizimber/alert-reactions-gcp-pubsub:v2
+dudizimber/karo-reactions-gcp-pubsub:v2.1.0
+dudizimber/karo-reactions-gcp-pubsub:v2.1
+dudizimber/karo-reactions-gcp-pubsub:v2
 ```
 
 **Creating Releases**: Maintainers create releases by tagging:
@@ -251,7 +251,7 @@ See `DOCKER_ACTIONS.md` for comprehensive development guidelines including:
 
 ## Environment Variables from Alerts
 
-The k8s-alert-reaction-operator provides access to alert data through environment variables:
+Karo provides access to alert data through environment variables:
 
 - Use `alertRef.fieldPath` to extract specific fields from the alert
 - Common paths include:

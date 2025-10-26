@@ -76,7 +76,7 @@ func loadConfig() (*Config, error) {
 		TopicID:            os.Getenv("PUBSUB_TOPIC_ID"),
 		ServiceAccountPath: os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"),
 		TimeoutSeconds:     30, // default
-		Source:             "k8s-alert-reaction-operator",
+		Source:             "karo",
 	}
 
 	// Validate required fields

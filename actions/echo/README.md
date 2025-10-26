@@ -1,6 +1,6 @@
 # Echo Action
 
-A simple debugging action that prints out alert information to help you understand what data is available from alerts and test your AlertReaction setup.
+A simple debugging action that prints out alert information to help you understand what data is available from alerts and test your Karo setup.
 
 ## What it does
 
@@ -13,7 +13,7 @@ This action creates a pod that echoes all available alert information, including
 
 ## Usage
 
-Copy the following action configuration into your AlertReaction's `spec.actions` array:
+Copy the following action configuration into your Karo's `spec.actions` array:
 
 ```yaml
 - name: echo-alert
@@ -79,7 +79,7 @@ Copy the following action configuration into your AlertReaction's `spec.actions`
 ## Example AlertReaction
 
 ```yaml
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: debug-alert-reaction
@@ -181,7 +181,7 @@ Raw Alert Data:
 ## Use Cases
 
 - **Debugging**: Understand what alert data is available
-- **Testing**: Verify your AlertReaction configuration works
+- **Testing**: Verify your Karo configuration works
 - **Development**: See the structure of alert data before building complex actions
 - **Monitoring**: Log alert occurrences for audit purposes
 

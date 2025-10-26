@@ -7,10 +7,10 @@ Copy this entire prompt into GitHub Copilot Chat to create a new shell-based act
 ## Prompt
 
 ```
-I need to create a new shell-based action for the k8s-alert-reaction-operator. This action should use existing container images and shell commands, requiring no custom compilation.
+I need to create a new shell-based action for Karo. This action should use existing container images and shell commands, requiring no custom compilation.
 
 ### Context
-The k8s-alert-reaction-operator executes actions as Kubernetes pods when alerts are triggered. Shell-based actions are simple, lightweight actions that use existing public container images (like Alpine, curl, kubectl) and execute shell commands to perform tasks.
+Karo executes actions as Kubernetes pods when alerts are triggered. Shell-based actions are simple, lightweight actions that use existing public container images (like Alpine, curl, kubectl) and execute shell commands to perform tasks.
 
 ### Repository Structure
 Shell-based actions have a simpler structure:

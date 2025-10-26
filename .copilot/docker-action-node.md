@@ -7,10 +7,10 @@ Copy this entire prompt into GitHub Copilot Chat to create a new Node.js-based D
 ## Prompt
 
 ```
-I need to create a new Docker-based action for the k8s-alert-reaction-operator. This action will be written in Node.js and should follow the established patterns in this repository.
+I need to create a new Docker-based action for Karo. This action will be written in Node.js and should follow the established patterns in this repository.
 
 ### Context
-The k8s-alert-reaction-operator executes actions as Kubernetes pods when alerts are triggered. Each action receives alert data through environment variables and performs specific tasks like sending notifications, scaling resources, or integrating with external systems.
+Karo executes actions as Kubernetes pods when alerts are triggered. Each action receives alert data through environment variables and performs specific tasks like sending notifications, scaling resources, or integrating with external systems.
 
 ### Repository Structure
 Actions are organized in the `actions/` directory with this structure:
@@ -147,7 +147,7 @@ main();
 ### Package.json Structure
 ```json
 {
-  "name": "alert-reactions-[ACTION_NAME]",
+  "name": "karo-reactions-[ACTION_NAME]",
   "version": "1.0.0",
   "description": "[ACTION DESCRIPTION]",
   "main": "src/index.js",

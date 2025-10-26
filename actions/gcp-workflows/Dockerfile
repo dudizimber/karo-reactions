@@ -1,9 +1,9 @@
 # Build stage
 FROM golang:1.24-alpine AS builder
 
-LABEL org.opencontainers.image.title="Alert Reaction: GCP Workflows Executor"
+LABEL org.opencontainers.image.title="Karo: GCP Workflows Executor"
 LABEL org.opencontainers.image.description="Executes Google Cloud Workflows based on Prometheus alerts"
-LABEL org.opencontainers.image.source="https://github.com/dudizimber/alert-reactions"
+LABEL org.opencontainers.image.source="https://github.com/dudizimber/karo-reactions"
 LABEL org.opencontainers.image.vendor="dudizimber"
 
 WORKDIR /app

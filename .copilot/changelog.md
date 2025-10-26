@@ -7,7 +7,7 @@ Copy this entire prompt into GitHub Copilot Chat to create or update a CHANGELOG
 ## Prompt
 
 ```
-I need to create or update a CHANGELOG.md file for my alert reaction action. The changelog should follow the Keep a Changelog format and integrate with the release automation system.
+I need to create or update a CHANGELOG.md file for my Karo action. The changelog should follow the Keep a Changelog format and integrate with the release automation system.
 
 ### Context
 Every Docker-based action MUST include a CHANGELOG.md file following the Keep a Changelog format. This changelog is used by the release automation system to generate GitHub release notes and track changes over time.
