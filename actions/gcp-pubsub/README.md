@@ -14,11 +14,11 @@ A robust action that publishes alert data to Google Cloud Pub/Sub topics for eve
 
 ## Usage
 
-Add this action to your AlertReaction:
+Add this action to your Karo:
 
 ```yaml
 - name: publish-to-pubsub
-  image: dudizimber/alert-reactions-gcp-pubsub:v1.0.0
+  image: dudizimber/karo-reactions-gcp-pubsub:v1.0.0
   env:
   - name: GCP_PROJECT_ID
     value: "your-gcp-project-id"
@@ -80,7 +80,7 @@ Add this action to your AlertReaction:
 | `PUBSUB_TOPIC_ID` | **Yes** | - | Name of the Pub/Sub topic to publish to |
 | `GOOGLE_APPLICATION_CREDENTIALS` | No | - | Path to service account JSON file |
 | `TIMEOUT_SECONDS` | No | `30` | Publishing timeout in seconds |
-| `MESSAGE_SOURCE` | No | `k8s-alert-reaction-operator` | Source identifier for messages |
+| `MESSAGE_SOURCE` | No | `karo` | Source identifier for messages |
 | `ALERT_JSON` | No | - | Complete alert data as JSON |
 | `ALERT_NAME` | No | - | Alert name (fallback if ALERT_JSON not available) |
 | `ALERT_STATUS` | No | - | Alert status (firing/resolved) |
@@ -209,7 +209,7 @@ kubectl create secret generic gcp-pubsub-credentials \
 ### 3. Create AlertReaction
 
 ```yaml
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: pubsub-alert-reaction
@@ -218,7 +218,7 @@ spec:
   alertName: HighCPUUsage
   actions:
   - name: publish-to-pubsub
-    image: dudizimber/alert-reactions-gcp-pubsub:v1.0.0
+    image: dudizimber/karo-reactions-gcp-pubsub:v1.0.0
     env:
     - name: GCP_PROJECT_ID
       value: "your-gcp-project-id"
@@ -292,7 +292,7 @@ The service account needs the following IAM permissions:
 
 ```bash
 # Build the Docker image
-docker build -t dudizimber/alert-reactions-gcp-pubsub:dev .
+docker build -t dudizimber/karo-reactions-gcp-pubsub:dev .
 
 # Test with sample data (requires GCP credentials)
 docker run --rm \
@@ -300,7 +300,7 @@ docker run --rm \
   -e GCP_PROJECT_ID="your-project-id" \
   -e PUBSUB_TOPIC_ID="test-topic" \
   -e ALERT_JSON='{"status":"firing","labels":{"alertname":"TestAlert","severity":"warning"},"annotations":{"summary":"Test alert"}}' \
-  dudizimber/alert-reactions-gcp-pubsub:dev
+  dudizimber/karo-reactions-gcp-pubsub:dev
 ```
 
 ## Testing
@@ -329,7 +329,7 @@ docker run --rm \
   -e ALERT_STATUS="firing" \
   -e ALERT_SEVERITY="critical" \
   -e MESSAGE_SOURCE="test-cluster" \
-  dudizimber/alert-reactions-gcp-pubsub:latest
+  dudizimber/karo-reactions-gcp-pubsub:latest
 
 # Verify message was published
 gcloud pubsub subscriptions create test-sub --topic=test-alerts --project=your-project-id

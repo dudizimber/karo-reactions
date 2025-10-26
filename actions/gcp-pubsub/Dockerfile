@@ -1,9 +1,9 @@
 # Build stage
 FROM golang:1.24-alpine AS builder
 
-LABEL org.opencontainers.image.title="Alert Reaction: GCP Pub/Sub Publisher"
+LABEL org.opencontainers.image.title="Karo: GCP Pub/Sub Publisher"
 LABEL org.opencontainers.image.description="Publishes alert data to Google Cloud Pub/Sub topics"
-LABEL org.opencontainers.image.source="https://github.com/dudizimber/alert-reactions"
+LABEL org.opencontainers.image.source="https://github.com/dudizimber/karo-reactions"
 LABEL org.opencontainers.image.vendor="dudizimber"
 
 WORKDIR /app

@@ -91,7 +91,7 @@ func loadConfig() (*Config, error) {
 		WorkflowNameField:  os.Getenv("WORKFLOW_NAME_FIELD"),
 		ServiceAccountPath: os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"),
 		TimeoutSeconds:     300, // default 5 minutes
-		Source:             "k8s-alert-reaction-operator",
+		Source:             "karo",
 		WaitForCompletion:  true,
 	}
 

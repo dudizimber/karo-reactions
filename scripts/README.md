@@ -1,6 +1,6 @@
 # Scripts
 
-This directory contains helper scripts for maintaining the alert-reactions repository.
+This directory contains helper scripts for maintaining the karo-reactions repository.
 
 ## prepare-release.sh
 

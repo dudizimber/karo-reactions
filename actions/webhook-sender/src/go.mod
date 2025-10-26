@@ -1,4 +1,4 @@
-module github.com/dudizimber/alert-reactions/webhook-sender
+module github.com/dudizimber/karo-reactions/webhook-sender
 
 go 1.24
 

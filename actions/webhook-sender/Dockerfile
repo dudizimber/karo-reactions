@@ -1,9 +1,9 @@
 # Build stage
 FROM golang:1.24-alpine AS builder
 
-LABEL org.opencontainers.image.title="Alert Reaction: Webhook Sender"
+LABEL org.opencontainers.image.title="Karo: Webhook Sender"
 LABEL org.opencontainers.image.description="Sends alert data to HTTP webhooks"
-LABEL org.opencontainers.image.source="https://github.com/dudizimber/alert-reactions"
+LABEL org.opencontainers.image.source="https://github.com/dudizimber/karo-reactions"
 LABEL org.opencontainers.image.vendor="dudizimber"
 
 WORKDIR /app

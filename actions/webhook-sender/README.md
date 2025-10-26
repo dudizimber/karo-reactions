@@ -17,7 +17,7 @@ Add this action to your AlertReaction:
 
 ```yaml
 - name: send-webhook
-  image: dudizimber/alert-reactions-webhook-sender:v1.0.0
+  image: dudizimber/karo-reactions-webhook-sender:v1.0.0
   env:
   - name: WEBHOOK_URL
     valueFrom:
@@ -129,7 +129,7 @@ stringData:
 ### 2. Create AlertReaction
 
 ```yaml
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: webhook-alert-reaction
@@ -138,7 +138,7 @@ spec:
   alertName: HighCPUUsage
   actions:
   - name: send-webhook
-    image: dudizimber/alert-reactions-webhook-sender:v1.0.0
+    image: dudizimber/karo-reactions-webhook-sender:v1.0.0
     env:
     - name: WEBHOOK_URL
       valueFrom:
@@ -193,13 +193,13 @@ spec:
 
 ```bash
 # Build the Docker image
-docker build -t dudizimber/alert-reactions-webhook-sender:dev .
+docker build -t dudizimber/karo-reactions-webhook-sender:dev .
 
 # Test with sample data
 docker run --rm \
   -e WEBHOOK_URL="https://httpbin.org/post" \
   -e ALERT_JSON='{"status":"firing","labels":{"alertname":"TestAlert","severity":"warning"},"annotations":{"summary":"Test alert"}}' \
-  dudizimber/alert-reactions-webhook-sender:dev
+  dudizimber/karo-reactions-webhook-sender:dev
 ```
 
 ## Testing
@@ -222,7 +222,7 @@ docker run --rm \
   -e ALERT_NAME="TestAlert" \
   -e ALERT_STATUS="firing" \
   -e ALERT_SEVERITY="critical" \
-  dudizimber/alert-reactions-webhook-sender:latest
+  dudizimber/karo-reactions-webhook-sender:latest
 ```
 
 ## Security Considerations

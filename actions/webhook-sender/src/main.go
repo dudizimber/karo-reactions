@@ -137,7 +137,7 @@ func sendWebhook(url string, payload WebhookPayload, timeoutSeconds int) error {
 
 	// Set headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "alert-reactions-webhook-sender/1.0.0")
+	req.Header.Set("User-Agent", "karo-webhook-sender/1.0.0")
 
 	// Add custom headers from environment variables
 	if authHeader := os.Getenv("AUTH_HEADER"); authHeader != "" {

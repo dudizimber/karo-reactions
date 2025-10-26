@@ -7,7 +7,7 @@ Copy this entire prompt into GitHub Copilot Chat to create a comprehensive test 
 ## Prompt
 
 ```
-I need to create a comprehensive test.sh script for my alert reaction action. The script should follow the established patterns in this repository and thoroughly test the action.
+I need to create a comprehensive test.sh script for my Karo action. The script should follow the established patterns in this repository and thoroughly test the action.
 
 ### Context
 Every Docker-based action MUST include a test.sh script, and shell-based actions SHOULD include one if testable. The test script is executed by the CI/CD pipeline and should validate that the action works correctly.

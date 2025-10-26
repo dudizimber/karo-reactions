@@ -22,7 +22,7 @@ Execute a fixed workflow for all matching alerts:
 
 ```yaml
 - name: execute-incident-workflow
-  image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+  image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
   env:
   - name: GCP_PROJECT_ID
     value: "your-gcp-project-id"
@@ -84,7 +84,7 @@ Execute different workflows based on alert content:
 
 ```yaml
 - name: execute-alert-specific-workflow
-  image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+  image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
   env:
   - name: GCP_PROJECT_ID
     value: "your-gcp-project-id"
@@ -139,7 +139,7 @@ Execute different workflows based on alert content:
 | `GOOGLE_APPLICATION_CREDENTIALS` | No | - | Path to service account JSON file |
 | `TIMEOUT_SECONDS` | No | `300` | Execution timeout in seconds |
 | `WAIT_FOR_COMPLETION` | No | `true` | Whether to wait for workflow completion |
-| `WORKFLOW_SOURCE` | No | `k8s-alert-reaction-operator` | Source identifier for workflow executions |
+| `WORKFLOW_SOURCE` | No | `karo` | Source identifier for workflow executions |
 | `ALERT_JSON` | No | - | Complete alert data as JSON |
 | `ALERT_NAME` | No | - | Alert name (fallback if ALERT_JSON not available) |
 | `ALERT_STATUS` | No | - | Alert status (firing/resolved) |
@@ -250,7 +250,7 @@ gcloud container clusters update my-cluster \
 ```bash
 # Create the Google Service Account
 gcloud iam service-accounts create workflows-executor \
-    --display-name="Workflows Executor for Alert Reactions" \
+    --display-name="Workflows Executor for Karo" \
     --project=PROJECT_ID
 
 # Grant necessary permissions
@@ -280,10 +280,10 @@ gcloud iam service-accounts add-iam-policy-binding \
     --member "serviceAccount:PROJECT_ID.svc.id.goog[monitoring/alert-workflows-sa]"
 ```
 
-#### Step 5: Use in AlertReaction
+#### Step 5: Use in Karo
 
 ```yaml
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: workflow-alert-reaction
@@ -293,7 +293,7 @@ spec:
   alertName: HighCPUUsage
   actions:
   - name: execute-workflow
-    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
     env:
     - name: GCP_PROJECT_ID
       value: "PROJECT_ID"
@@ -344,7 +344,7 @@ The action passes alert data to the workflow as JSON input:
     "workflow_name": "cpu-incident-response"
   },
   "timestamp": "2025-10-05T12:34:56Z",
-  "source": "k8s-alert-reaction-operator"
+  "source": "karo"
 }
 ```
 
@@ -353,7 +353,7 @@ The action passes alert data to the workflow as JSON input:
 ### Example 1: Static Workflow with Service Account
 
 ```yaml
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: static-workflow-reaction
@@ -362,7 +362,7 @@ spec:
   alertName: DatabaseDown
   actions:
   - name: execute-db-recovery-workflow
-    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
     env:
     - name: GCP_PROJECT_ID
       value: "my-gcp-project"
@@ -434,7 +434,7 @@ metadata:
   annotations:
     iam.gke.io/gcp-service-account: workflows-executor@my-gcp-project.iam.gserviceaccount.com
 ---
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: dynamic-workflow-reaction
@@ -444,7 +444,7 @@ spec:
   alertName: GenericAlert
   actions:
   - name: execute-alert-specific-workflow
-    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
     env:
     - name: GCP_PROJECT_ID
       value: "my-gcp-project"
@@ -573,7 +573,7 @@ gcloud projects add-iam-policy-binding PROJECT_ID \
 
 ```bash
 # Build the Docker image
-docker build -t dudizimber/alert-reactions-gcp-workflows:dev .
+docker build -t dudizimber/karo-reactions-gcp-workflows:dev .
 
 # Test with sample data (requires GCP credentials)
 docker run --rm \
@@ -583,7 +583,7 @@ docker run --rm \
     -e WORKFLOW_NAME="test-workflow" \
     -e WAIT_FOR_COMPLETION="false" \
     -e ALERT_JSON='{"status":"firing","labels":{"alertname":"TestAlert","severity":"warning"},"annotations":{"summary":"Test alert"}}' \
-    dudizimber/alert-reactions-gcp-workflows:dev
+    dudizimber/karo-reactions-gcp-workflows:dev
 ```
 
 ## Testing
@@ -599,7 +599,7 @@ go test -v ./...
 
 ```bash
 # Run the comprehensive test suite
-./test.sh dudizimber/alert-reactions-gcp-workflows:dev
+./test.sh dudizimber/karo-reactions-gcp-workflows:dev
 ```
 
 ### Manual Integration Test
@@ -630,7 +630,7 @@ docker run --rm \
     -e ALERT_NAME="TestAlert" \
     -e ALERT_STATUS="firing" \
     -e ALERT_SEVERITY="info" \
-    dudizimber/alert-reactions-gcp-workflows:latest
+    dudizimber/karo-reactions-gcp-workflows:latest
 
 # Check execution results
 gcloud workflows executions list \

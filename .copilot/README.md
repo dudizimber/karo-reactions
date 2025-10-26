@@ -7,7 +7,7 @@ Copy this entire prompt into GitHub Copilot Chat to create comprehensive README.
 ## Prompt
 
 ```
-I need to create a comprehensive README.md file for my alert reaction action. The documentation should be clear, complete, and follow the established patterns in this repository.
+I need to create a comprehensive README.md file for my Karo action. The documentation should be clear, complete, and follow the established patterns in this repository.
 
 ### Context
 Every action MUST include a detailed README.md file that explains what the action does, how to use it, and provides complete configuration examples. This documentation is crucial for users to understand and implement the action.
@@ -137,7 +137,7 @@ For shell actions, include:
 
 ### Example AlertReaction Context
 ```yaml
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: [descriptive-name]
@@ -198,9 +198,11 @@ Generate documentation that makes it easy for users to understand and implement 
 3. **Check clarity**: Make sure explanations are clear and helpful
 4. **Update variables**: Ensure environment variables table matches action code
 5. **Validate context**: Confirm AlertReaction example shows realistic usage
-6. **Refine as needed**: Update documentation as the action evolves# GitHub Copilot Prompts for Alert Reactions
+6. **Refine as needed**: Update documentation as the action evolves
 
-This directory contains structured prompts to help developers create new actions for the k8s-alert-reaction-operator using GitHub Copilot.
+# GitHub Copilot Prompts for Karo
+
+This directory contains structured prompts to help developers create new actions for Karo using GitHub Copilot.
 
 ## Available Prompts
 
@@ -230,7 +232,7 @@ This directory contains structured prompts to help developers create new actions
 ## Prompt Structure
 
 Each prompt follows this structure:
-- **Context**: Explains the k8s-alert-reaction-operator and action requirements
+- **Context**: Explains Karo and action requirements
 - **Specifications**: Technical requirements and constraints
 - **Examples**: Reference implementations from existing actions
 - **Tasks**: Step-by-step generation requests

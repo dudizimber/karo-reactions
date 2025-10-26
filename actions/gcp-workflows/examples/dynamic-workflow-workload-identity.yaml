@@ -6,7 +6,7 @@ metadata:
   annotations:
     iam.gke.io/gcp-service-account: workflows-executor@my-gcp-project.iam.gserviceaccount.com
 ---
-apiVersion: alertreaction.io/v1alpha1
+apiVersion: karo.io/v1alpha1
 kind: AlertReaction
 metadata:
   name: dynamic-workflow-example
@@ -16,7 +16,7 @@ spec:
   alertName: GenericAlert  # Match alerts that have workflow field in labels
   actions:
   - name: execute-alert-specific-workflow
-    image: dudizimber/alert-reactions-gcp-workflows:v1.0.0
+    image: dudizimber/karo-reactions-gcp-workflows:v1.0.0
     env:
     - name: GCP_PROJECT_ID
       value: "my-gcp-project"
